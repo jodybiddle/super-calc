@@ -70,7 +70,7 @@ interface YearlyDrawdownData {
 
 export default function SuperCalculator(): React.ReactElement {
   const [currentAge, setCurrentAge] = useState<number>(58);
-  const [currentSalary, setCurrentSalary] = useState<number>(300000);
+  const [currentSalary, setCurrentSalary] = useState<number>(120000);
   const [startAge, setStartAge] = useState<number>(22);
   const [careerBreakYears, setCareerBreakYears] = useState<number>(0);
   const [gender, setGender] = useState<GenderType>('male');
@@ -376,15 +376,18 @@ export default function SuperCalculator(): React.ReactElement {
   };
 
   return (
-    <div style={{
+    <div className="super-calc-container" style={{
       minHeight: '100vh',
       background: 'linear-gradient(165deg, #f8f6f3 0%, #ebe7e0 50%, #ddd8ce 100%)',
       fontFamily: "'Source Serif 4', 'Georgia', serif",
-      padding: '2rem 1rem',
       color: '#2c2825'
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+
+        .super-calc-container {
+          padding: 2rem 1rem;
+        }
 
         input[type="range"] {
           -webkit-appearance: none;
@@ -393,20 +396,21 @@ export default function SuperCalculator(): React.ReactElement {
           background: #c4b8a8;
           border-radius: 3px;
           outline: none;
+          touch-action: manipulation;
         }
         input[type="range"]::-webkit-slider-thumb {
           -webkit-appearance: none;
           appearance: none;
-          width: 20px;
-          height: 20px;
+          width: 24px;
+          height: 24px;
           background: #8b5a2b;
           border-radius: 50%;
           cursor: pointer;
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
         input[type="range"]::-moz-range-thumb {
-          width: 20px;
-          height: 20px;
+          width: 24px;
+          height: 24px;
           background: #8b5a2b;
           border-radius: 50%;
           cursor: pointer;
@@ -424,6 +428,7 @@ export default function SuperCalculator(): React.ReactElement {
           cursor: pointer;
           border-bottom: 3px solid transparent;
           transition: all 0.2s ease;
+          white-space: nowrap;
         }
         .tab-btn:hover {
           color: #3d3530;
@@ -439,7 +444,7 @@ export default function SuperCalculator(): React.ReactElement {
           border: 2px solid #d4cdc2;
           border-radius: 8px;
           font-family: 'DM Sans', sans-serif;
-          font-size: 1rem;
+          font-size: 16px;
           color: #3d3530;
           background: #fff;
           transition: border-color 0.2s ease;
@@ -452,13 +457,131 @@ export default function SuperCalculator(): React.ReactElement {
         input[type="number"]::-webkit-outer-spin-button {
           opacity: 1;
         }
+
+        .grid-2-col {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1.25rem;
+        }
+        .grid-3-col {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1rem;
+        }
+        .grid-4-col {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1rem;
+        }
+        .balance-buttons {
+          display: flex;
+          gap: 1rem;
+        }
+        .tab-nav {
+          display: flex;
+          justify-content: center;
+          gap: 0.5rem;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .tab-nav::-webkit-scrollbar {
+          display: none;
+        }
+        .main-title {
+          font-size: 2.25rem;
+        }
+        .main-balance {
+          font-size: 3rem;
+        }
+        .section-balance {
+          font-size: 1.75rem;
+        }
+        .additional-balance {
+          font-size: 2.25rem;
+        }
+        .asfa-labels {
+          display: flex;
+          justify-content: space-between;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.7rem;
+          color: #8b8078;
+        }
+        .card-padding {
+          padding: 1.75rem;
+        }
+        .results-padding {
+          padding: 2rem;
+        }
+
+        @media (max-width: 640px) {
+          .super-calc-container {
+            padding: 1rem 0.75rem;
+          }
+          .grid-2-col {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+          .grid-3-col {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+          }
+          .grid-4-col {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+          }
+          .balance-buttons {
+            flex-direction: column;
+          }
+          .tab-btn {
+            padding: 0.6rem 0.75rem;
+            font-size: 0.8rem;
+          }
+          .main-title {
+            font-size: 1.5rem;
+          }
+          .main-balance {
+            font-size: 2rem;
+          }
+          .section-balance {
+            font-size: 1.25rem;
+          }
+          .additional-balance {
+            font-size: 1.75rem;
+          }
+          .asfa-labels {
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            justify-content: center;
+            text-align: center;
+          }
+          .asfa-labels span {
+            flex: 0 0 auto;
+          }
+          .card-padding {
+            padding: 1rem;
+          }
+          .results-padding {
+            padding: 1.25rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .grid-4-col {
+            grid-template-columns: 1fr;
+          }
+          .tab-nav {
+            justify-content: flex-start;
+            padding: 0 0.5rem;
+          }
+        }
       `}</style>
 
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Header */}
-        <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h1 style={{
-            fontSize: '2.25rem',
+        <header style={{ textAlign: 'center', marginBottom: '2rem', padding: '0 0.5rem' }}>
+          <h1 className="main-title" style={{
             fontWeight: 700,
             color: '#3d3530',
             marginBottom: '0.5rem',
@@ -479,10 +602,7 @@ export default function SuperCalculator(): React.ReactElement {
         </header>
 
         {/* Tab Navigation */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '0.5rem',
+        <div className="tab-nav" style={{
           marginBottom: '1.5rem',
           borderBottom: '1px solid #d4cdc2'
         }}>
@@ -508,11 +628,10 @@ export default function SuperCalculator(): React.ReactElement {
 
         {/* Main Input Card - Show on estimate and sacrifice tabs */}
         {(activeTab === 'estimate' || activeTab === 'sacrifice') && (
-          <div style={{
+          <div className="card-padding" style={{
             background: '#fffefb',
             borderRadius: '16px',
             boxShadow: '0 4px 24px rgba(60, 45, 30, 0.08), 0 1px 3px rgba(60, 45, 30, 0.04)',
-            padding: '1.75rem',
             marginBottom: '1.5rem'
           }}>
             <h3 style={{
@@ -528,10 +647,7 @@ export default function SuperCalculator(): React.ReactElement {
             </h3>
 
             {/* Input Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '1.25rem',
+            <div className="grid-2-col" style={{
               marginBottom: '1.25rem'
             }}>
               {/* Current Age */}
@@ -718,10 +834,7 @@ export default function SuperCalculator(): React.ReactElement {
 
             {/* Advanced Options */}
             {showAdvanced && (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '1rem',
+              <div className="grid-2-col" style={{
                 padding: '1rem',
                 background: '#f8f5f0',
                 borderRadius: '8px',
@@ -796,10 +909,9 @@ export default function SuperCalculator(): React.ReactElement {
         {activeTab === 'estimate' && (
           <>
             {/* Results Card */}
-            <div style={{
+            <div className="results-padding" style={{
               background: 'linear-gradient(135deg, #3d3530 0%, #5c4a3d 100%)',
               borderRadius: '16px',
-              padding: '2rem',
               color: '#fff',
               marginBottom: '1.5rem'
             }}>
@@ -814,8 +926,7 @@ export default function SuperCalculator(): React.ReactElement {
                 }}>
                   Estimated Current Balance
                 </p>
-                <p style={{
-                  fontSize: '3rem',
+                <p className="main-balance" style={{
                   fontWeight: 700,
                   letterSpacing: '-0.02em',
                   color: '#f5ebe0'
@@ -824,10 +935,7 @@ export default function SuperCalculator(): React.ReactElement {
                 </p>
               </div>
 
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '1rem',
+              <div className="grid-3-col" style={{
                 borderTop: '1px solid rgba(255,255,255,0.15)',
                 paddingTop: '1.5rem'
               }}>
@@ -884,11 +992,10 @@ export default function SuperCalculator(): React.ReactElement {
             </div>
 
             {/* Comparison Card */}
-            <div style={{
+            <div className="card-padding" style={{
               background: '#fffefb',
               borderRadius: '16px',
               boxShadow: '0 4px 24px rgba(60, 45, 30, 0.08)',
-              padding: '1.5rem',
               marginBottom: '1.5rem'
             }}>
               <h3 style={{
@@ -951,11 +1058,10 @@ export default function SuperCalculator(): React.ReactElement {
         {activeTab === 'sacrifice' && (
           <>
             {/* Salary Sacrifice Inputs */}
-            <div style={{
+            <div className="card-padding" style={{
               background: '#fffefb',
               borderRadius: '16px',
               boxShadow: '0 4px 24px rgba(60, 45, 30, 0.08)',
-              padding: '1.5rem',
               marginBottom: '1.5rem'
             }}>
               <h3 style={{
@@ -978,7 +1084,7 @@ export default function SuperCalculator(): React.ReactElement {
                 See what your balance would be if you had salary sacrificed additional contributions
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.25rem' }}>
+              <div className="grid-2-col">
                 <div>
                   <label style={{
                     display: 'block',
@@ -1046,17 +1152,13 @@ export default function SuperCalculator(): React.ReactElement {
 
             {/* Salary Sacrifice Results */}
             {salarySacrificeResults && salarySacrificeAmount > 0 && (
-              <div style={{
+              <div className="results-padding" style={{
                 background: 'linear-gradient(135deg, #2d4a3e 0%, #3d5c4a 100%)',
                 borderRadius: '16px',
-                padding: '2rem',
                 color: '#fff',
                 marginBottom: '1.5rem'
               }}>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '1.5rem',
+                <div className="grid-2-col" style={{
                   marginBottom: '1.5rem'
                 }}>
                   <div>
@@ -1070,8 +1172,7 @@ export default function SuperCalculator(): React.ReactElement {
                     }}>
                       Without Salary Sacrifice
                     </p>
-                    <p style={{
-                      fontSize: '1.75rem',
+                    <p className="section-balance" style={{
                       fontWeight: 600,
                       color: '#c4d4cc'
                     }}>
@@ -1089,8 +1190,7 @@ export default function SuperCalculator(): React.ReactElement {
                     }}>
                       With Salary Sacrifice
                     </p>
-                    <p style={{
-                      fontSize: '1.75rem',
+                    <p className="section-balance" style={{
                       fontWeight: 700,
                       color: '#e0f0e8'
                     }}>
@@ -1116,8 +1216,7 @@ export default function SuperCalculator(): React.ReactElement {
                     }}>
                       Additional Balance Gained
                     </p>
-                    <p style={{
-                      fontSize: '2.25rem',
+                    <p className="additional-balance" style={{
                       fontWeight: 700,
                       color: '#90EE90'
                     }}>
@@ -1125,10 +1224,7 @@ export default function SuperCalculator(): React.ReactElement {
                     </p>
                   </div>
 
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: '1rem',
+                  <div className="grid-3-col" style={{
                     borderTop: '1px solid rgba(255,255,255,0.15)',
                     paddingTop: '1rem'
                   }}>
@@ -1218,11 +1314,10 @@ export default function SuperCalculator(): React.ReactElement {
         {activeTab === 'drawdown' && (
           <>
             {/* Starting Balance Input */}
-            <div style={{
+            <div className="card-padding" style={{
               background: '#fffefb',
               borderRadius: '16px',
               boxShadow: '0 4px 24px rgba(60, 45, 30, 0.08)',
-              padding: '1.5rem',
               marginBottom: '1.5rem'
             }}>
               <h3 style={{
@@ -1237,7 +1332,7 @@ export default function SuperCalculator(): React.ReactElement {
                 Your Superannuation Balance
               </h3>
 
-              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+              <div className="balance-buttons" style={{ marginBottom: '1rem' }}>
                 <button
                   onClick={() => setUseManualBalance(false)}
                   style={{
@@ -1315,11 +1410,10 @@ export default function SuperCalculator(): React.ReactElement {
             </div>
 
             {/* Drawdown Inputs */}
-            <div style={{
+            <div className="card-padding" style={{
               background: '#fffefb',
               borderRadius: '16px',
               boxShadow: '0 4px 24px rgba(60, 45, 30, 0.08)',
-              padding: '1.5rem',
               marginBottom: '1.5rem'
             }}>
               <h3 style={{
@@ -1334,7 +1428,7 @@ export default function SuperCalculator(): React.ReactElement {
                 Retirement Income Settings
               </h3>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <div className="grid-2-col" style={{ marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{
                     display: 'block',
@@ -1485,11 +1579,10 @@ export default function SuperCalculator(): React.ReactElement {
             </div>
 
             {/* Part-Time Work Section */}
-            <div style={{
+            <div className="card-padding" style={{
               background: '#fffefb',
               borderRadius: '16px',
               boxShadow: '0 4px 24px rgba(60, 45, 30, 0.08)',
-              padding: '1.5rem',
               marginBottom: '1.5rem'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
@@ -1526,7 +1619,7 @@ export default function SuperCalculator(): React.ReactElement {
                     Model income from part-time work, consulting, or portfolio career during early retirement
                   </p>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                  <div className="grid-3-col">
                     <div>
                       <label style={{
                         display: 'block',
@@ -1635,11 +1728,10 @@ export default function SuperCalculator(): React.ReactElement {
             </div>
 
             {/* ASFA Comparison */}
-            <div style={{
+            <div className="card-padding" style={{
               background: '#fffefb',
               borderRadius: '16px',
               boxShadow: '0 4px 24px rgba(60, 45, 30, 0.08)',
-              padding: '1.25rem',
               marginBottom: '1.5rem'
             }}>
               <h4 style={{
@@ -1702,13 +1794,7 @@ export default function SuperCalculator(): React.ReactElement {
                 }} />
               </div>
 
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: '0.7rem',
-                color: '#8b8078'
-              }}>
+              <div className="asfa-labels">
                 <span>$30k</span>
                 <span style={{ color: '#c4956a' }}>Modest: {formatCurrency(drawdownResults.asfaModest)}</span>
                 <span style={{ color: '#5a8b6a' }}>Comfortable: {formatCurrency(drawdownResults.asfaComfortable)}</span>
@@ -1717,17 +1803,13 @@ export default function SuperCalculator(): React.ReactElement {
             </div>
 
             {/* Drawdown Results */}
-            <div style={{
+            <div className="results-padding" style={{
               background: 'linear-gradient(135deg, #4a3d5c 0%, #5c4a6d 100%)',
               borderRadius: '16px',
-              padding: '2rem',
               color: '#fff',
               marginBottom: '1.5rem'
             }}>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '1.5rem',
+              <div className="grid-2-col" style={{
                 marginBottom: '1.5rem'
               }}>
                 <div>
@@ -1741,8 +1823,7 @@ export default function SuperCalculator(): React.ReactElement {
                   }}>
                     {useManualBalance ? 'Starting Balance' : `Balance at Retirement (Age ${retirementAge})`}
                   </p>
-                  <p style={{
-                    fontSize: '1.75rem',
+                  <p className="section-balance" style={{
                     fontWeight: 700,
                     color: '#e8e0f0'
                   }}>
@@ -1770,8 +1851,7 @@ export default function SuperCalculator(): React.ReactElement {
                   }}>
                     Super Lasts Until Age
                   </p>
-                  <p style={{
-                    fontSize: '1.75rem',
+                  <p className="section-balance" style={{
                     fontWeight: 700,
                     color: drawdownResults.superLastsUntilAge >= 95 ? '#90EE90' : '#FFB6C1'
                   }}>
@@ -1791,13 +1871,9 @@ export default function SuperCalculator(): React.ReactElement {
               <div style={{
                 background: 'rgba(255,255,255,0.1)',
                 borderRadius: '12px',
-                padding: '1.25rem'
+                padding: '1rem'
               }}>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: '1rem'
-                }}>
+                <div className="grid-4-col">
                   <div style={{ textAlign: 'center' }}>
                     <p style={{
                       fontFamily: "'DM Sans', sans-serif",
@@ -1863,13 +1939,13 @@ export default function SuperCalculator(): React.ReactElement {
             </div>
 
             {/* Year-by-Year Table */}
-            <div style={{
+            <div className="card-padding" style={{
               background: '#fffefb',
               borderRadius: '16px',
               boxShadow: '0 4px 24px rgba(60, 45, 30, 0.08)',
-              padding: '1.5rem',
               marginBottom: '1.5rem',
-              overflowX: 'auto'
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch'
             }}>
               <h4 style={{
                 fontFamily: "'DM Sans', sans-serif",
@@ -1885,9 +1961,10 @@ export default function SuperCalculator(): React.ReactElement {
 
               <table style={{
                 width: '100%',
+                minWidth: '500px',
                 borderCollapse: 'collapse',
                 fontFamily: "'DM Sans', sans-serif",
-                fontSize: '0.8rem'
+                fontSize: '0.75rem'
               }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid #d4cdc2' }}>
