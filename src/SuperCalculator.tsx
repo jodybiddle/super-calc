@@ -1,12 +1,7 @@
-
-Joanne Gray
-5:32 PM (8 minutes ago)
-to me
-
 import React, { useState, useMemo } from 'react';
 
 // Historical SG rates by financial year
-const SG_RATES = {
+const SG_RATES: Record<number, number> = {
   1992: 0.03, 1993: 0.03, 1994: 0.04, 1995: 0.05, 1996: 0.06,
   1997: 0.06, 1998: 0.06, 1999: 0.07, 2000: 0.08, 2001: 0.08,
   2002: 0.09, 2003: 0.09, 2004: 0.09, 2005: 0.09, 2006: 0.09,
@@ -17,7 +12,7 @@ const SG_RATES = {
 };
 
 // Historical maximum contribution base (quarterly)
-const MAX_CONTRIB_BASE_QUARTERLY = {
+const MAX_CONTRIB_BASE_QUARTERLY: Record<number, number> = {
   1992: 20000, 1993: 21000, 1994: 22000, 1995: 23000, 1996: 24000,
   1997: 25000, 1998: 26000, 1999: 27000, 2000: 28000, 2001: 29000,
   2002: 30560, 2003: 31180, 2004: 32180, 2005: 33120, 2006: 34170,
@@ -28,7 +23,7 @@ const MAX_CONTRIB_BASE_QUARTERLY = {
 };
 
 // Historical concessional contribution caps
-const CONCESSIONAL_CAPS = {
+const CONCESSIONAL_CAPS: Record<number, number> = {
   2007: 50000, 2008: 50000, 2009: 50000, 2010: 25000, 2011: 25000,
   2012: 25000, 2013: 25000, 2014: 30000, 2015: 30000, 2016: 30000,
   2017: 30000, 2018: 25000, 2019: 25000, 2020: 25000, 2021: 25000,
@@ -36,12 +31,12 @@ const CONCESSIONAL_CAPS = {
 };
 
 // Average balances by age for comparison (ATO data 2022)
-const AVG_BALANCES_MALE = {
+const AVG_BALANCES_MALE: Record<number, number> = {
   25: 25000, 30: 55000, 35: 95000, 40: 150000, 45: 210000,
   50: 280000, 55: 340000, 60: 380000, 65: 420000
 };
 
-const AVG_BALANCES_FEMALE = {
+const AVG_BALANCES_FEMALE: Record<number, number> = {
   25: 22000, 30: 45000, 35: 75000, 40: 115000, 45: 155000,
   50: 200000, 55: 250000, 60: 290000, 65: 320000
 };
@@ -56,39 +51,56 @@ const ASFA_MODEST_COUPLE = 47731;
 const AGE_PENSION_SINGLE = 29754;
 const AGE_PENSION_COUPLE = 44855;
 
-export default function SuperCalculator() {
-  const [currentAge, setCurrentAge] = useState(58);
-  const [currentSalary, setCurrentSalary] = useState(300000);
-  const [startAge, setStartAge] = useState(22);
-  const [careerBreakYears, setCareerBreakYears] = useState(0);
-  const [gender, setGender] = useState('male');
-  const [employerAboveSG, setEmployerAboveSG] = useState(0);
-  const [returnRate, setReturnRate] = useState(7);
-  const [showAdvanced, setShowAdvanced] = useState(false);
- 
+type TabType = 'estimate' | 'sacrifice' | 'drawdown';
+type GenderType = 'male' | 'female';
+type RelationshipType = 'single' | 'couple';
+
+interface YearlyDrawdownData {
+  year: number;
+  age: number;
+  balanceStart: number;
+  workIncome: number;
+  pension: number;
+  drawdown: number;
+  superContrib: number;
+  totalIncome: number;
+  balanceEnd: number;
+  isWorkingPartTime: boolean;
+}
+
+export default function SuperCalculator(): React.ReactElement {
+  const [currentAge, setCurrentAge] = useState<number>(58);
+  const [currentSalary, setCurrentSalary] = useState<number>(300000);
+  const [startAge, setStartAge] = useState<number>(22);
+  const [careerBreakYears, setCareerBreakYears] = useState<number>(0);
+  const [gender, setGender] = useState<GenderType>('male');
+  const [employerAboveSG, setEmployerAboveSG] = useState<number>(0);
+  const [returnRate, setReturnRate] = useState<number>(7);
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
+
   // Salary sacrifice inputs
-  const [salarySacrificeAmount, setSalarySacrificeAmount] = useState(0);
-  const [salarySacrificeYears, setSalarySacrificeYears] = useState(10);
- 
+  const [salarySacrificeAmount, setSalarySacrificeAmount] = useState<number>(0);
+  const [salarySacrificeYears, setSalarySacrificeYears] = useState<number>(10);
+
   // Drawdown inputs
-  const [retirementAge, setRetirementAge] = useState(65);
-  const [annualDrawdown, setAnnualDrawdown] = useState(60000);
-  const [includeAgePension, setIncludeAgePension] = useState(true);
-  const [relationshipStatus, setRelationshipStatus] = useState('single');
-  const [drawdownReturnRate, setDrawdownReturnRate] = useState(5);
- 
-  // NEW: Manual super balance input
-  const [useManualBalance, setUseManualBalance] = useState(false);
-  const [manualSuperBalance, setManualSuperBalance] = useState(800000);
- 
-  // NEW: Part-time work in retirement
-  const [includePartTimeWork, setIncludePartTimeWork] = useState(false);
-  const [partTimeIncome, setPartTimeIncome] = useState(30000);
-  const [partTimeYears, setPartTimeYears] = useState(5);
-  const [partTimeStartAge, setPartTimeStartAge] = useState(65);
- 
+  const [retirementAge, setRetirementAge] = useState<number>(65);
+  const [annualDrawdown, setAnnualDrawdown] = useState<number>(60000);
+  const [includeAgePension, setIncludeAgePension] = useState<boolean>(true);
+  const [relationshipStatus, setRelationshipStatus] = useState<RelationshipType>('single');
+  const [drawdownReturnRate, setDrawdownReturnRate] = useState<number>(5);
+
+  // Manual super balance input
+  const [useManualBalance, setUseManualBalance] = useState<boolean>(false);
+  const [manualSuperBalance, setManualSuperBalance] = useState<number>(800000);
+
+  // Part-time work in retirement
+  const [includePartTimeWork, setIncludePartTimeWork] = useState<boolean>(false);
+  const [partTimeIncome, setPartTimeIncome] = useState<number>(30000);
+  const [partTimeYears, setPartTimeYears] = useState<number>(5);
+  const [partTimeStartAge, setPartTimeStartAge] = useState<number>(65);
+
   // Active tab
-  const [activeTab, setActiveTab] = useState('estimate');
+  const [activeTab, setActiveTab] = useState<TabType>('estimate');
 
   // Calculate base super results
   const baseResults = useMemo(() => {
@@ -96,19 +108,19 @@ export default function SuperCalculator() {
     const birthYear = currentYear - currentAge;
     const workStartYear = birthYear + startAge;
     const sgStartYear = Math.max(1992, workStartYear);
-   
+
     const salaryGrowthRate = 0.04;
-    const getSalaryForYear = (year) => {
+    const getSalaryForYear = (year: number): number => {
       const yearsFromNow = currentYear - year;
       return currentSalary / Math.pow(1 + salaryGrowthRate, yearsFromNow);
     };
 
     let totalBalance = 0;
     let totalContributions = 0;
-   
+
     for (let year = sgStartYear; year <= currentYear; year++) {
       const age = year - birthYear;
-     
+
       const breakStartAge = 30;
       const breakEndAge = breakStartAge + careerBreakYears;
       if (age >= breakStartAge && age < breakEndAge) {
@@ -119,14 +131,14 @@ export default function SuperCalculator() {
       const salary = getSalaryForYear(year);
       const sgRate = SG_RATES[year] || 0.12;
       const totalRate = sgRate + (employerAboveSG / 100);
-     
+
       const maxQuarterly = MAX_CONTRIB_BASE_QUARTERLY[year] || 62500;
       const maxAnnual = maxQuarterly * 4;
       const cappedSalary = Math.min(salary, maxAnnual);
-     
+
       const contribution = cappedSalary * totalRate;
       totalContributions += contribution;
-     
+
       totalBalance = (totalBalance + contribution) * (1 + returnRate / 100);
     }
 
@@ -135,7 +147,7 @@ export default function SuperCalculator() {
     const avgBalance = avgBalances[Math.min(65, Math.max(25, nearestAge))] || 300000;
 
     const ratio = totalBalance / avgBalance;
-    let percentile;
+    let percentile: string;
     if (ratio >= 3) percentile = "top 5%";
     else if (ratio >= 2.5) percentile = "top 10%";
     else if (ratio >= 2) percentile = "top 15%";
@@ -159,16 +171,16 @@ export default function SuperCalculator() {
   // Calculate salary sacrifice scenario
   const salarySacrificeResults = useMemo(() => {
     if (salarySacrificeAmount === 0) return null;
-   
+
     const currentYear = 2026;
     const birthYear = currentYear - currentAge;
     const workStartYear = birthYear + startAge;
     const sgStartYear = Math.max(1992, workStartYear);
-   
+
     const sacrificeStartYear = currentYear - salarySacrificeYears;
-   
+
     const salaryGrowthRate = 0.04;
-    const getSalaryForYear = (year) => {
+    const getSalaryForYear = (year: number): number => {
       const yearsFromNow = currentYear - year;
       return currentSalary / Math.pow(1 + salaryGrowthRate, yearsFromNow);
     };
@@ -177,10 +189,10 @@ export default function SuperCalculator() {
     let totalContributions = 0;
     let totalSalarySacrifice = 0;
     let taxSaved = 0;
-   
+
     for (let year = sgStartYear; year <= currentYear; year++) {
       const age = year - birthYear;
-     
+
       const breakStartAge = 30;
       const breakEndAge = breakStartAge + careerBreakYears;
       if (age >= breakStartAge && age < breakEndAge) {
@@ -191,35 +203,35 @@ export default function SuperCalculator() {
       const salary = getSalaryForYear(year);
       const sgRate = SG_RATES[year] || 0.12;
       const totalRate = sgRate + (employerAboveSG / 100);
-     
+
       const maxQuarterly = MAX_CONTRIB_BASE_QUARTERLY[year] || 62500;
       const maxAnnual = maxQuarterly * 4;
       const cappedSalary = Math.min(salary, maxAnnual);
-     
+
       let contribution = cappedSalary * totalRate;
-     
+
       if (year >= sacrificeStartYear) {
         const concessionalCap = CONCESSIONAL_CAPS[year] || 27500;
         const availableRoom = Math.max(0, concessionalCap - contribution);
         const actualSacrifice = Math.min(salarySacrificeAmount, availableRoom);
-       
+
         contribution += actualSacrifice;
         totalSalarySacrifice += actualSacrifice;
-       
+
         let marginalRate = 0.32;
         if (salary > 180000) marginalRate = 0.45;
         else if (salary > 120000) marginalRate = 0.37;
         else if (salary > 45000) marginalRate = 0.325;
-       
+
         taxSaved += actualSacrifice * (marginalRate - 0.15);
       }
-     
+
       totalContributions += contribution;
       totalBalance = (totalBalance + contribution) * (1 + returnRate / 100);
     }
 
     const additionalBalance = totalBalance - baseResults.estimatedBalance;
-   
+
     return {
       newBalance: Math.round(totalBalance),
       additionalBalance: Math.round(additionalBalance),
@@ -235,7 +247,7 @@ export default function SuperCalculator() {
   // Calculate drawdown projection
   const drawdownResults = useMemo(() => {
     // Determine starting point
-    let startingBalance;
+    let startingBalance: number;
     if (useManualBalance) {
       startingBalance = manualSuperBalance;
     } else if (salarySacrificeResults) {
@@ -243,11 +255,11 @@ export default function SuperCalculator() {
     } else {
       startingBalance = baseResults.estimatedBalance;
     }
-   
+
     // Project balance to retirement age (only if using estimated balance and not already retired)
     const yearsToRetirement = Math.max(0, retirementAge - currentAge);
     let balanceAtRetirement = startingBalance;
-   
+
     // Continue growth until retirement if using estimated balance
     if (!useManualBalance && yearsToRetirement > 0) {
       for (let i = 0; i < yearsToRetirement; i++) {
@@ -257,44 +269,44 @@ export default function SuperCalculator() {
         balanceAtRetirement = (balanceAtRetirement + contribution) * (1 + returnRate / 100);
       }
     }
-   
+
     // Age pension eligibility
     const pensionAge = 67;
     const annualPension = relationshipStatus === 'single'
       ? AGE_PENSION_SINGLE
       : AGE_PENSION_COUPLE / 2;
-   
+
     // Part-time work period
     const partTimeEndAge = includePartTimeWork ? partTimeStartAge + partTimeYears : 0;
-   
+
     // Drawdown simulation
     let balance = balanceAtRetirement;
-    const yearlyData = [];
+    const yearlyData: YearlyDrawdownData[] = [];
     let yearsLasted = 0;
     const maxYears = 40;
-   
+
     for (let year = 0; year < maxYears && balance > 0; year++) {
       const age = retirementAge + year;
       const receivePension = includeAgePension && age >= pensionAge;
-     
+
       // Part-time work income
       const isWorkingPartTime = includePartTimeWork && age >= partTimeStartAge && age < partTimeEndAge;
       const workIncome = isWorkingPartTime ? partTimeIncome : 0;
-     
+
       // Super contributions from part-time work
       const partTimeSuperContrib = isWorkingPartTime ? partTimeIncome * 0.12 : 0;
-     
+
       // Calculate income sources
       const pensionIncome = receivePension ? annualPension : 0;
       const totalOtherIncome = workIncome + pensionIncome;
-     
+
       // Net drawdown needed from super
       const drawdownFromSuper = Math.max(0, annualDrawdown - totalOtherIncome);
-     
+
       // Apply return, add any super contributions, then subtract drawdown
       const investmentReturn = balance * (drawdownReturnRate / 100);
       balance = balance + investmentReturn + partTimeSuperContrib - drawdownFromSuper;
-     
+
       yearlyData.push({
         year: year + 1,
         age,
@@ -307,18 +319,18 @@ export default function SuperCalculator() {
         balanceEnd: Math.round(Math.max(0, balance)),
         isWorkingPartTime
       });
-     
+
       if (balance > 0) yearsLasted = year + 1;
     }
-   
+
     const superLastsUntilAge = balance > 0 ? retirementAge + maxYears : retirementAge + yearsLasted;
-   
+
     // Calculate totals
     const totalDrawn = yearlyData.reduce((sum, y) => sum + y.totalIncome, 0);
     const totalWorkIncome = yearlyData.reduce((sum, y) => sum + y.workIncome, 0);
     const totalPensionReceived = yearlyData.reduce((sum, y) => sum + y.pension, 0);
     const totalFromSuper = yearlyData.reduce((sum, y) => sum + y.drawdown, 0);
-   
+
     // ASFA comparison
     const asfaComfortable = relationshipStatus === 'single'
       ? ASFA_COMFORTABLE_SINGLE
@@ -326,8 +338,8 @@ export default function SuperCalculator() {
     const asfaModest = relationshipStatus === 'single'
       ? ASFA_MODEST_SINGLE
       : ASFA_MODEST_COUPLE;
-   
-    let lifestyleRating;
+
+    let lifestyleRating: string;
     if (annualDrawdown >= asfaComfortable) lifestyleRating = 'comfortable';
     else if (annualDrawdown >= asfaModest) lifestyleRating = 'modest';
     else lifestyleRating = 'below modest';
@@ -354,7 +366,7 @@ export default function SuperCalculator() {
       useManualBalance, manualSuperBalance, includePartTimeWork, partTimeIncome,
       partTimeYears, partTimeStartAge]);
 
-  const formatCurrency = (num) => {
+  const formatCurrency = (num: number): string => {
     return new Intl.NumberFormat('en-AU', {
       style: 'currency',
       currency: 'AUD',
@@ -373,7 +385,7 @@ export default function SuperCalculator() {
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
-       
+
         input[type="range"] {
           -webkit-appearance: none;
           appearance: none;
@@ -400,7 +412,7 @@ export default function SuperCalculator() {
           cursor: pointer;
           border: none;
         }
-       
+
         .tab-btn {
           padding: 0.75rem 1.25rem;
           border: none;
@@ -420,7 +432,7 @@ export default function SuperCalculator() {
           color: #8b5a2b;
           border-bottom-color: #8b5a2b;
         }
-       
+
         input[type="number"] {
           width: 100%;
           padding: 0.6rem 0.75rem;
@@ -514,7 +526,7 @@ export default function SuperCalculator() {
             }}>
               Your Details
             </h3>
-           
+
             {/* Input Grid */}
             <div style={{
               display: 'grid',
@@ -658,7 +670,7 @@ export default function SuperCalculator() {
                   fontWeight: 500,
                   color: '#6b5f54'
                 }}>Gender:</span>
-                {['male', 'female'].map((g) => (
+                {(['male', 'female'] as const).map((g) => (
                   <button
                     key={g}
                     onClick={() => setGender(g)}
@@ -890,7 +902,7 @@ export default function SuperCalculator() {
               }}>
                 How You Compare
               </h3>
-             
+
               <div style={{ marginBottom: '0.75rem' }}>
                 <div style={{
                   height: '10px',
@@ -965,7 +977,7 @@ export default function SuperCalculator() {
               }}>
                 See what your balance would be if you had salary sacrificed additional contributions
               </p>
-             
+
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.25rem' }}>
                 <div>
                   <label style={{
@@ -998,7 +1010,7 @@ export default function SuperCalculator() {
                     }}>{formatCurrency(salarySacrificeAmount)}</span>
                   </div>
                 </div>
-               
+
                 <div>
                   <label style={{
                     display: 'block',
@@ -1112,7 +1124,7 @@ export default function SuperCalculator() {
                       +{formatCurrency(salarySacrificeResults.additionalBalance)}
                     </p>
                   </div>
-                 
+
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(3, 1fr)',
@@ -1224,7 +1236,7 @@ export default function SuperCalculator() {
               }}>
                 Your Superannuation Balance
               </h3>
-             
+
               <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                 <button
                   onClick={() => setUseManualBalance(false)}
@@ -1247,7 +1259,7 @@ export default function SuperCalculator() {
                     {formatCurrency(salarySacrificeResults ? salarySacrificeResults.newBalance : baseResults.estimatedBalance)} (from calculator)
                   </div>
                 </button>
-               
+
                 <button
                   onClick={() => setUseManualBalance(true)}
                   style={{
@@ -1270,7 +1282,7 @@ export default function SuperCalculator() {
                   </div>
                 </button>
               </div>
-             
+
               {useManualBalance && (
                 <div style={{
                   background: '#f8f5f0',
@@ -1321,7 +1333,7 @@ export default function SuperCalculator() {
               }}>
                 Retirement Income Settings
               </h3>
-             
+
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{
@@ -1352,7 +1364,7 @@ export default function SuperCalculator() {
                     }}>{retirementAge}</span>
                   </div>
                 </div>
-               
+
                 <div>
                   <label style={{
                     display: 'block',
@@ -1384,7 +1396,7 @@ export default function SuperCalculator() {
                     }}>{formatCurrency(annualDrawdown)}</span>
                   </div>
                 </div>
-               
+
                 <div>
                   <label style={{
                     display: 'block',
@@ -1416,7 +1428,7 @@ export default function SuperCalculator() {
                     }}>{drawdownReturnRate}%</span>
                   </div>
                 </div>
-               
+
                 <div>
                   <label style={{
                     display: 'block',
@@ -1429,7 +1441,7 @@ export default function SuperCalculator() {
                     Status
                   </label>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    {['single', 'couple'].map((s) => (
+                    {(['single', 'couple'] as const).map((s) => (
                       <button
                         key={s}
                         onClick={() => setRelationshipStatus(s)}
@@ -1498,7 +1510,7 @@ export default function SuperCalculator() {
                   Include Part-Time Work in Retirement
                 </label>
               </div>
-             
+
               {includePartTimeWork && (
                 <div style={{
                   background: '#f8f5f0',
@@ -1513,7 +1525,7 @@ export default function SuperCalculator() {
                   }}>
                     Model income from part-time work, consulting, or portfolio career during early retirement
                   </p>
-                 
+
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
                     <div>
                       <label style={{
@@ -1544,7 +1556,7 @@ export default function SuperCalculator() {
                         }}>{Math.max(partTimeStartAge, retirementAge)}</span>
                       </div>
                     </div>
-                   
+
                     <div>
                       <label style={{
                         display: 'block',
@@ -1574,7 +1586,7 @@ export default function SuperCalculator() {
                         }}>{partTimeYears} yrs</span>
                       </div>
                     </div>
-                   
+
                     <div>
                       <label style={{
                         display: 'block',
@@ -1607,7 +1619,7 @@ export default function SuperCalculator() {
                       </div>
                     </div>
                   </div>
-                 
+
                   <p style={{
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: '0.8rem',
@@ -1641,7 +1653,7 @@ export default function SuperCalculator() {
               }}>
                 ASFA Retirement Standard Comparison
               </h4>
-             
+
               <div style={{ position: 'relative', height: '40px', marginBottom: '0.5rem' }}>
                 <div style={{
                   position: 'absolute',
@@ -1653,7 +1665,7 @@ export default function SuperCalculator() {
                   borderRadius: '4px',
                   transform: 'translateY(-50%)'
                 }} />
-               
+
                 <div style={{
                   position: 'absolute',
                   left: `${(drawdownResults.asfaModest / 300000) * 100}%`,
@@ -1664,7 +1676,7 @@ export default function SuperCalculator() {
                   background: '#c4956a',
                   borderRadius: '2px'
                 }} />
-               
+
                 <div style={{
                   position: 'absolute',
                   left: `${(drawdownResults.asfaComfortable / 300000) * 100}%`,
@@ -1675,7 +1687,7 @@ export default function SuperCalculator() {
                   background: '#5a8b6a',
                   borderRadius: '2px'
                 }} />
-               
+
                 <div style={{
                   position: 'absolute',
                   left: `${Math.min((annualDrawdown / 300000) * 100, 100)}%`,
@@ -1689,7 +1701,7 @@ export default function SuperCalculator() {
                   boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
                 }} />
               </div>
-             
+
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -1745,4 +1757,209 @@ export default function SuperCalculator() {
                     }}>
                       ({drawdownResults.yearsToRetirement} more years of contributions)
                     </p>
-        &nb
+                  )}
+                </div>
+                <div>
+                  <p style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: '0.75rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    color: '#c4b8d4',
+                    marginBottom: '0.25rem'
+                  }}>
+                    Super Lasts Until Age
+                  </p>
+                  <p style={{
+                    fontSize: '1.75rem',
+                    fontWeight: 700,
+                    color: drawdownResults.superLastsUntilAge >= 95 ? '#90EE90' : '#FFB6C1'
+                  }}>
+                    {drawdownResults.superLastsUntilAge >= retirementAge + 40 ? '95+' : drawdownResults.superLastsUntilAge}
+                  </p>
+                  <p style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: '0.75rem',
+                    color: '#a89bc4',
+                    marginTop: '0.25rem'
+                  }}>
+                    {drawdownResults.yearsLasted >= 40 ? 'Funds last 40+ years' : `${drawdownResults.yearsLasted} years of income`}
+                  </p>
+                </div>
+              </div>
+
+              <div style={{
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+                padding: '1.25rem'
+              }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '1rem'
+                }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: '0.65rem',
+                      textTransform: 'uppercase',
+                      color: '#c4b8d4',
+                      marginBottom: '0.2rem'
+                    }}>Total Income</p>
+                    <p style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      color: '#e8e0f0'
+                    }}>{formatCurrency(drawdownResults.totalDrawn)}</p>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: '0.65rem',
+                      textTransform: 'uppercase',
+                      color: '#c4b8d4',
+                      marginBottom: '0.2rem'
+                    }}>From Super</p>
+                    <p style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      color: '#e8e0f0'
+                    }}>{formatCurrency(drawdownResults.totalFromSuper)}</p>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: '0.65rem',
+                      textTransform: 'uppercase',
+                      color: '#c4b8d4',
+                      marginBottom: '0.2rem'
+                    }}>Age Pension</p>
+                    <p style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      color: '#90EE90'
+                    }}>{formatCurrency(drawdownResults.totalPensionReceived)}</p>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: '0.65rem',
+                      textTransform: 'uppercase',
+                      color: '#c4b8d4',
+                      marginBottom: '0.2rem'
+                    }}>Work Income</p>
+                    <p style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      color: '#b8d4e8'
+                    }}>{formatCurrency(drawdownResults.totalWorkIncome)}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Year-by-Year Table */}
+            <div style={{
+              background: '#fffefb',
+              borderRadius: '16px',
+              boxShadow: '0 4px 24px rgba(60, 45, 30, 0.08)',
+              padding: '1.5rem',
+              marginBottom: '1.5rem',
+              overflowX: 'auto'
+            }}>
+              <h4 style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: '#5c524a',
+                marginBottom: '1rem'
+              }}>
+                Year-by-Year Projection
+              </h4>
+
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '0.8rem'
+              }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #d4cdc2' }}>
+                    <th style={{ textAlign: 'left', padding: '0.5rem', color: '#6b5f54' }}>Age</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem', color: '#6b5f54' }}>Balance Start</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem', color: '#6b5f54' }}>Work</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem', color: '#6b5f54' }}>Pension</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem', color: '#6b5f54' }}>From Super</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem', color: '#6b5f54' }}>Balance End</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {drawdownResults.yearlyData.slice(0, 20).map((row) => (
+                    <tr key={row.year} style={{
+                      borderBottom: '1px solid #e8e2da',
+                      background: row.isWorkingPartTime ? '#f0f8f4' : 'transparent'
+                    }}>
+                      <td style={{ padding: '0.5rem', fontWeight: 500 }}>{row.age}</td>
+                      <td style={{ textAlign: 'right', padding: '0.5rem' }}>{formatCurrency(row.balanceStart)}</td>
+                      <td style={{ textAlign: 'right', padding: '0.5rem', color: row.workIncome > 0 ? '#2d6a4f' : '#8b8078' }}>
+                        {row.workIncome > 0 ? formatCurrency(row.workIncome) : '-'}
+                      </td>
+                      <td style={{ textAlign: 'right', padding: '0.5rem', color: row.pension > 0 ? '#5a8b6a' : '#8b8078' }}>
+                        {row.pension > 0 ? formatCurrency(row.pension) : '-'}
+                      </td>
+                      <td style={{ textAlign: 'right', padding: '0.5rem', color: '#c4956a' }}>
+                        {formatCurrency(row.drawdown)}
+                      </td>
+                      <td style={{
+                        textAlign: 'right',
+                        padding: '0.5rem',
+                        fontWeight: 600,
+                        color: row.balanceEnd > 0 ? '#3d3530' : '#dc3545'
+                      }}>
+                        {formatCurrency(row.balanceEnd)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {drawdownResults.yearlyData.length > 20 && (
+                <p style={{
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: '0.75rem',
+                  color: '#8b8078',
+                  marginTop: '0.75rem',
+                  textAlign: 'center',
+                  fontStyle: 'italic'
+                }}>
+                  Showing first 20 years of {drawdownResults.yearlyData.length} years projected
+                </p>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Footer */}
+        <footer style={{
+          textAlign: 'center',
+          padding: '1.5rem',
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: '0.75rem',
+          color: '#8b8078'
+        }}>
+          <p>
+            This calculator provides estimates only and should not be considered financial advice.
+            <br />
+            Consult a qualified financial adviser for personalised recommendations.
+          </p>
+        </footer>
+      </div>
+    </div>
+  );
+}
