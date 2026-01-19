@@ -70,7 +70,7 @@ interface YearlyDrawdownData {
 
 export default function SuperCalculator(): React.ReactElement {
   const [currentAge, setCurrentAge] = useState<number>(58);
-  const [currentSalary, setCurrentSalary] = useState<number>(300000);
+  const [currentSalary, setCurrentSalary] = useState<number>(120000);
   const [startAge, setStartAge] = useState<number>(22);
   const [careerBreakYears, setCareerBreakYears] = useState<number>(0);
   const [gender, setGender] = useState<GenderType>('male');
